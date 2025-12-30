@@ -1,0 +1,233 @@
+Vulnerability,Description,Parameter,Attack,Evidence,Source,Other Info,Recommendations,Links,Severity Level,Classifications,Status,Confidence,Event log,Request Header,Request Body,Response Header,Response Body,ID
+X-Content-Type-Options Header Missing,"The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.",x-content-type-options,,,PASSIVE,"This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.
+At ""High"" threshold this scan rule will not alert on client or server error responses.","Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages.
+If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.",1. https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/compatibility/gg622941(v=vs.85)<br/>2. https://owasp.org/www-community/Security_Headers,Low,"CWE-693, OWASP_2017_A06, OWASP_2021_A05",Not processed,2,,"POST http://vampi.derscanner.com/users/v1/register HTTP/1.1 host: vampi.derscanner.com user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 pragma: no-cache cache-control: no-cache accept: application/json content-type: application/json content-length: 67","{""email"":""zaproxy@example.com"",""password"":""DAST"",""username"":""name1""}","HTTP/1.1 200 OK Server: Werkzeug/2.2.3 Python/3.11.10 Date: Fri, 04 Apr 2025 14:48:42 GMT Content-Type: application/json Content-Length: 69 Connection: close","{ ""status"": ""fail"", ""message"": ""User already exists. Please Log in.""}",5663
+Application Error Disclosure,This page contains an error/warning message that may disclose sensitive information like the location of the file that produced the unhandled exception. This information can be used to launch further attacks against the web application. The alert could be a false positive if the error message is found inside a documentation page.,,,HTTP/1.1 500 INTERNAL SERVER ERROR,PASSIVE,,Review the source code of this page. Implement custom error pages. Consider implementing a mechanism to provide a unique error reference/identifier to the client (browser) while logging the details on the server side and not exposing them to the user.,"1. ",Low,"CWE-200, OWASP_2017_A06, OWASP_2021_A05, WSTG-v42-ERRH-01, WSTG-v42-ERRH-02",Not processed,2,,"GET http://vampi.derscanner.com/books/v1 HTTP/1.1 host: vampi.derscanner.com user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 pragma: no-cache cache-control: no-cache",,"HTTP/1.1 500 INTERNAL SERVER ERROR Server: Werkzeug/2.2.3 Python/3.11.10 Date: Fri, 04 Apr 2025 14:48:44 GMT Content-Type: text/html; charset=utf-8 Content-Length: 46926 Connection: close","sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: books
+[SQL: SELECT books.id AS books_id, books.book_title AS books_book_title, books.secret_content AS books_secret_content, books.user_id AS books_user_id 
+FROM books]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+ // Werkzeug Debugger OperationalError sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: books [SQL: SELECT books.id AS books_id, books.book_title AS books_book_title, books.secret_content AS books_secret_content, books.user_id AS books_user_id FROM books] (Background on this error at: https://sqlalche.me/e/20/e3q8) Traceback (most recent call last) File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1964, in _exec_single_context                             context,                         ):                             evt_handled = True                             break                 if not evt_handled:                     self.dialect.do_execute(
+                    ^                         cursor, str_statement, effective_parameters, context                     )              if self._has_events or self.engine._has_events:                 self.dispatch.after_cursor_execute( File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py"", line 747, in do_execute      def do_executemany(self, cursor, statement, parameters, context=None):         cursor.executemany(statement, parameters)      def do_execute(self, cursor, statement, parameters, context=None):         cursor.execute(statement, parameters)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      def do_execute_no_params(self, cursor, statement, context=None):         cursor.execute(statement)      def is_disconnect(self, e, connection, cursor): The above exception was the direct cause of the following exception: File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 2548, in __call__     def __call__(self, environ: dict, start_response: t.Callable) -> t.Any:         """"""The WSGI server calls the Flask application object as the         WSGI application. This calls :meth:`wsgi_app`, which can be         wrapped to apply middleware.         """"""         return self.wsgi_app(environ, start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 2528, in wsgi_app             try:                 ctx.push()                 response = self.full_dispatch_request()             except Exception as e:                 error = e                 response = self.handle_exception(e)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^             except:  # noqa: B001                 error = sys.exc_info()[1]                 raise             return response(environ, start_response)         finally: File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 2525, in wsgi_app         ctx = self.request_context(environ)         error: t.Optional[BaseException] = None         try:             try:                 ctx.push()                 response = self.full_dispatch_request()
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^             except Exception as e:                 error = e                 response = self.handle_exception(e)             except:  # noqa: B001                 error = sys.exc_info()[1] File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 1822, in full_dispatch_request             request_started.send(self)             rv = self.preprocess_request()             if rv is None:                 rv = self.dispatch_request()         except Exception as e:             rv = self.handle_user_exception(e)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^         return self.finalize_request(rv)      def finalize_request(         self,         rv: t.Union[ft.ResponseReturnValue, HTTPException], File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 1820, in full_dispatch_request          try:             request_started.send(self)             rv = self.preprocess_request()             if rv is None:                 rv = self.dispatch_request()
+                     ^^^^^^^^^^^^^^^^^^^^^^^         except Exception as e:             rv = self.handle_user_exception(e)         return self.finalize_request(rv)      def finalize_request( File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 1796, in dispatch_request             and req.method == ""OPTIONS""         ):             return self.make_default_options_response()         # otherwise dispatch to the handler for that endpoint         view_args: t.Dict[str, t.Any] = req.view_args  # type: ignore[assignment]         return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      def full_dispatch_request(self) -> Response:         """"""Dispatches the request and on top of that performs request         pre and postprocessing as well as HTTP exception catching and         error handling. File ""/usr/local/lib/python3.11/site-packages/connexion/decorators/decorator.py"", line 68, in wrapper          else:  # pragma: no cover             @functools.wraps(function)             def wrapper(*args, **kwargs):                 request = self.api.get_request(*args, **kwargs)                 response = function(request)
+                           ^^^^^^^^^^^^^^^^^                 return self.api.get_response(response, self.mimetype, request)          return wrapper File ""/usr/local/lib/python3.11/site-packages/connexion/decorators/uri_parsing.py"", line 149, in wrapper             form = coerce_dict(request.form)              request.query = self.resolve_query(query)             request.path_params = self.resolve_path(path_params)             request.form = self.resolve_form(form)             response = function(request)
+                       ^^^^^^^^^^^^^^^^^             return response          return wrapper   File ""/usr/local/lib/python3.11/site-packages/connexion/decorators/parameter.py"", line 120, in wrapper          # attempt to provide the request context to the function         if pass_context_arg_name and (has_kwargs or pass_context_arg_name in arguments):             kwargs[pass_context_arg_name] = request.context          return function(**kwargs)
+               ^^^^^^^^^^^^^^^^^^      return wrapper File ""/vampi/api_views/books.py"", line 13, in get_all_books from models.books_model import Book from app import vuln   def get_all_books():     return_value = jsonify({'Books': Book.get_all_books()})
+                                     ^^^^^^^^^^^^^^^^^^^^     return return_value   def add_new_book():     request_data = request.get_json() File ""/vampi/models/books_model.py"", line 28, in get_all_books     def json(self):         return {'book_title': self.book_title, 'user': self.user.username}      @staticmethod     def get_all_books():         return [Book.json(user) for user in Book.query.all()]
+                                            ^^^^^^^^^^^^^^^^ File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py"", line 2712, in all              :meth:`_engine.Result.all` - v2 comparable method.              :meth:`_engine.Result.scalars` - v2 comparable method.         """"""         return self._iter().all()  # type: ignore
+               ^^^^^^^^^^^^      @_generative     @_assertions(_no_clauseelement_condition)     def from_statement(         self: SelfQuery, statement: ExecutableReturnsRows File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py"", line 2872, in _iter     def _iter(self) -> Union[ScalarResult[_T], Result[_T]]:         # new style execution.         params = self._params          statement = self._statement_20()         result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                                  statement,             params,             execution_options={""_sa_orm_load_options"": self.load_options},         )  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py"", line 2229, in execute          :return: a :class:`_engine.Result` object.           """"""         return self._execute_internal(
+                           statement,             params,             execution_options=execution_options,             bind_arguments=bind_arguments,             _parent_execute_state=_parent_execute_state, File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py"", line 2124, in _execute_internal             return conn.scalar(                 statement, params or {}, execution_options=execution_options             )          if compile_state_cls:             result: Result[Any] = compile_state_cls.orm_execute_statement(
+                                                  self,                 statement,                 params or {},                 execution_options,                 bind_arguments, File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/context.py"", line 252, in orm_execute_statement         params,         execution_options,         bind_arguments,         conn,     ) -> Result:         result = conn.execute(
+                             statement, params or {}, execution_options=execution_options         )         return cls.orm_setup_cursor_result(             session,             statement, File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1414, in execute         try:             meth = statement._execute_on_connection         except AttributeError as err:             raise exc.ObjectNotExecutableError(statement) from err         else:             return meth(
+                                   self,                 distilled_parameters,                 execution_options or NO_OPTIONS,             )  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py"", line 489, in _execute_on_connection         execution_options: CoreExecuteOptionsParameter,     ) -> Result[Any]:         if self.supports_execution:             if TYPE_CHECKING:                 assert isinstance(self, Executable)             return connection._execute_clauseelement(
+                                   self, distilled_params, execution_options             )         else:             raise exc.ObjectNotExecutableError(self)  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1638, in _execute_clauseelement             column_keys=keys,             for_executemany=for_executemany,             schema_translate_map=schema_translate_map,             linting=self.dialect.compiler_linting | compiler.WARN_LINTING,         )         ret = self._execute_context(
+                          dialect,             dialect.execution_ctx_cls._init_compiled,             compiled_sql,             distilled_parameters,             execution_options, File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1842, in _execute_context             return self._exec_insertmany_context(                 dialect,                 context,             )         else:             return self._exec_single_context(
+                                   dialect, context, statement, parameters             )      def _exec_single_context(         self, File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1983, in _exec_single_context             context.post_exec()              result = context._setup_result_proxy()          except BaseException as e:             self._handle_dbapi_exception(
+            ^                 e, str_statement, effective_parameters, cursor, context             )          return result  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 2325, in _handle_dbapi_exception              if newraise:                 raise newraise.with_traceback(exc_info[2]) from e             elif should_wrap:                 assert sqlalchemy_exception is not None                 raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^             else:                 assert exc_info[1] is not None                 raise exc_info[1].with_traceback(exc_info[2])         finally:             del self._reentrant_error File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1964, in _exec_single_context                             context,                         ):                             evt_handled = True                             break                 if not evt_handled:                     self.dialect.do_execute(
+                    ^                         cursor, str_statement, effective_parameters, context                     )              if self._has_events or self.engine._has_events:                 self.dispatch.after_cursor_execute( File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py"", line 747, in do_execute      def do_executemany(self, cursor, statement, parameters, context=None):         cursor.executemany(statement, parameters)      def do_execute(self, cursor, statement, parameters, context=None):         cursor.execute(statement, parameters)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      def do_execute_no_params(self, cursor, statement, context=None):         cursor.execute(statement)      def is_disconnect(self, e, connection, cursor): sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: books [SQL: SELECT books.id AS books_id, books.book_title AS books_book_title, books.secret_content AS books_secret_content, books.user_id AS books_user_id FROM books] (Background on this error at: https://sqlalche.me/e/20/e3q8) This is the Copy/Paste friendly version of the traceback. Traceback (most recent call last):
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1964, in _exec_single_context
+    self.dialect.do_execute(
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py"", line 747, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.OperationalError: no such table: books
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 2548, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 2528, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/connexion/decorators/decorator.py"", line 68, in wrapper
+    response = function(request)
+               ^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/connexion/decorators/uri_parsing.py"", line 149, in wrapper
+    response = function(request)
+               ^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/connexion/decorators/parameter.py"", line 120, in wrapper
+    return function(**kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File ""/vampi/api_views/books.py"", line 13, in get_all_books
+    return_value = jsonify({'Books': Book.get_all_books()})
+                                     ^^^^^^^^^^^^^^^^^^^^^^
+  File ""/vampi/models/books_model.py"", line 28, in get_all_books
+    return [Book.json(user) for user in Book.query.all()]
+                                        ^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py"", line 2712, in all
+    return self._iter().all()  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py"", line 2872, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py"", line 2229, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py"", line 2124, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/context.py"", line 252, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1414, in execute
+    return meth(
+           ^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py"", line 489, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1638, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1842, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1983, in _exec_single_context
+    self._handle_dbapi_exception(
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 2325, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1964, in _exec_single_context
+    self.dialect.do_execute(
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py"", line 747, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: books
+[SQL: SELECT books.id AS books_id, books.book_title AS books_book_title, books.secret_content AS books_secret_content, books.user_id AS books_user_id 
+FROM books]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+ The debugger caught an exception in your WSGI application. You can now look at the traceback which led to the error. If you enable JavaScript you can also use additional features such as code execution (if the evalex feature is enabled), automatic pasting of the exceptions and much more. Brought to you by DON'T PANIC, your friendly Werkzeug powered traceback interpreter. Console Locked The console is locked and needs to be unlocked by entering the PIN. You can find the PIN printed out on the standard output of your shell that runs the server. PIN:",5667
+Information Disclosure - Suspicious Comments,The response appears to contain suspicious comments which may help an attacker. Note: Matches made within script blocks or files are against the entire content not only comments.,,,query,PASSIVE,"The following pattern was used: \bQUERY\b and was detected in the element starting with: ""<!--
+
+Traceback (most recent call last):
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1964, "", see evidence field for the suspicious comment/snippet.",Remove all comments that return information that may help an attacker and fix any underlying problems they refer to.,"1. ",Info,"CWE-200, OWASP_2017_A03, OWASP_2021_A01, WSTG-v42-INFO-05",Not processed,2,,"GET http://vampi.derscanner.com/books/v1 HTTP/1.1 host: vampi.derscanner.com user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 pragma: no-cache cache-control: no-cache",,"HTTP/1.1 500 INTERNAL SERVER ERROR Server: Werkzeug/2.2.3 Python/3.11.10 Date: Fri, 04 Apr 2025 14:48:44 GMT Content-Type: text/html; charset=utf-8 Content-Length: 46926 Connection: close","sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: books
+[SQL: SELECT books.id AS books_id, books.book_title AS books_book_title, books.secret_content AS books_secret_content, books.user_id AS books_user_id 
+FROM books]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+ // Werkzeug Debugger OperationalError sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: books [SQL: SELECT books.id AS books_id, books.book_title AS books_book_title, books.secret_content AS books_secret_content, books.user_id AS books_user_id FROM books] (Background on this error at: https://sqlalche.me/e/20/e3q8) Traceback (most recent call last) File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1964, in _exec_single_context                             context,                         ):                             evt_handled = True                             break                 if not evt_handled:                     self.dialect.do_execute(
+                    ^                         cursor, str_statement, effective_parameters, context                     )              if self._has_events or self.engine._has_events:                 self.dispatch.after_cursor_execute( File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py"", line 747, in do_execute      def do_executemany(self, cursor, statement, parameters, context=None):         cursor.executemany(statement, parameters)      def do_execute(self, cursor, statement, parameters, context=None):         cursor.execute(statement, parameters)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      def do_execute_no_params(self, cursor, statement, context=None):         cursor.execute(statement)      def is_disconnect(self, e, connection, cursor): The above exception was the direct cause of the following exception: File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 2548, in __call__     def __call__(self, environ: dict, start_response: t.Callable) -> t.Any:         """"""The WSGI server calls the Flask application object as the         WSGI application. This calls :meth:`wsgi_app`, which can be         wrapped to apply middleware.         """"""         return self.wsgi_app(environ, start_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 2528, in wsgi_app             try:                 ctx.push()                 response = self.full_dispatch_request()             except Exception as e:                 error = e                 response = self.handle_exception(e)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^             except:  # noqa: B001                 error = sys.exc_info()[1]                 raise             return response(environ, start_response)         finally: File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 2525, in wsgi_app         ctx = self.request_context(environ)         error: t.Optional[BaseException] = None         try:             try:                 ctx.push()                 response = self.full_dispatch_request()
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^             except Exception as e:                 error = e                 response = self.handle_exception(e)             except:  # noqa: B001                 error = sys.exc_info()[1] File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 1822, in full_dispatch_request             request_started.send(self)             rv = self.preprocess_request()             if rv is None:                 rv = self.dispatch_request()         except Exception as e:             rv = self.handle_user_exception(e)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^         return self.finalize_request(rv)      def finalize_request(         self,         rv: t.Union[ft.ResponseReturnValue, HTTPException], File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 1820, in full_dispatch_request          try:             request_started.send(self)             rv = self.preprocess_request()             if rv is None:                 rv = self.dispatch_request()
+                     ^^^^^^^^^^^^^^^^^^^^^^^         except Exception as e:             rv = self.handle_user_exception(e)         return self.finalize_request(rv)      def finalize_request( File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 1796, in dispatch_request             and req.method == ""OPTIONS""         ):             return self.make_default_options_response()         # otherwise dispatch to the handler for that endpoint         view_args: t.Dict[str, t.Any] = req.view_args  # type: ignore[assignment]         return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      def full_dispatch_request(self) -> Response:         """"""Dispatches the request and on top of that performs request         pre and postprocessing as well as HTTP exception catching and         error handling. File ""/usr/local/lib/python3.11/site-packages/connexion/decorators/decorator.py"", line 68, in wrapper          else:  # pragma: no cover             @functools.wraps(function)             def wrapper(*args, **kwargs):                 request = self.api.get_request(*args, **kwargs)                 response = function(request)
+                           ^^^^^^^^^^^^^^^^^                 return self.api.get_response(response, self.mimetype, request)          return wrapper File ""/usr/local/lib/python3.11/site-packages/connexion/decorators/uri_parsing.py"", line 149, in wrapper             form = coerce_dict(request.form)              request.query = self.resolve_query(query)             request.path_params = self.resolve_path(path_params)             request.form = self.resolve_form(form)             response = function(request)
+                       ^^^^^^^^^^^^^^^^^             return response          return wrapper   File ""/usr/local/lib/python3.11/site-packages/connexion/decorators/parameter.py"", line 120, in wrapper          # attempt to provide the request context to the function         if pass_context_arg_name and (has_kwargs or pass_context_arg_name in arguments):             kwargs[pass_context_arg_name] = request.context          return function(**kwargs)
+               ^^^^^^^^^^^^^^^^^^      return wrapper File ""/vampi/api_views/books.py"", line 13, in get_all_books from models.books_model import Book from app import vuln   def get_all_books():     return_value = jsonify({'Books': Book.get_all_books()})
+                                     ^^^^^^^^^^^^^^^^^^^^     return return_value   def add_new_book():     request_data = request.get_json() File ""/vampi/models/books_model.py"", line 28, in get_all_books     def json(self):         return {'book_title': self.book_title, 'user': self.user.username}      @staticmethod     def get_all_books():         return [Book.json(user) for user in Book.query.all()]
+                                            ^^^^^^^^^^^^^^^^ File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py"", line 2712, in all              :meth:`_engine.Result.all` - v2 comparable method.              :meth:`_engine.Result.scalars` - v2 comparable method.         """"""         return self._iter().all()  # type: ignore
+               ^^^^^^^^^^^^      @_generative     @_assertions(_no_clauseelement_condition)     def from_statement(         self: SelfQuery, statement: ExecutableReturnsRows File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py"", line 2872, in _iter     def _iter(self) -> Union[ScalarResult[_T], Result[_T]]:         # new style execution.         params = self._params          statement = self._statement_20()         result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                                  statement,             params,             execution_options={""_sa_orm_load_options"": self.load_options},         )  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py"", line 2229, in execute          :return: a :class:`_engine.Result` object.           """"""         return self._execute_internal(
+                           statement,             params,             execution_options=execution_options,             bind_arguments=bind_arguments,             _parent_execute_state=_parent_execute_state, File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py"", line 2124, in _execute_internal             return conn.scalar(                 statement, params or {}, execution_options=execution_options             )          if compile_state_cls:             result: Result[Any] = compile_state_cls.orm_execute_statement(
+                                                  self,                 statement,                 params or {},                 execution_options,                 bind_arguments, File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/context.py"", line 252, in orm_execute_statement         params,         execution_options,         bind_arguments,         conn,     ) -> Result:         result = conn.execute(
+                             statement, params or {}, execution_options=execution_options         )         return cls.orm_setup_cursor_result(             session,             statement, File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1414, in execute         try:             meth = statement._execute_on_connection         except AttributeError as err:             raise exc.ObjectNotExecutableError(statement) from err         else:             return meth(
+                                   self,                 distilled_parameters,                 execution_options or NO_OPTIONS,             )  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py"", line 489, in _execute_on_connection         execution_options: CoreExecuteOptionsParameter,     ) -> Result[Any]:         if self.supports_execution:             if TYPE_CHECKING:                 assert isinstance(self, Executable)             return connection._execute_clauseelement(
+                                   self, distilled_params, execution_options             )         else:             raise exc.ObjectNotExecutableError(self)  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1638, in _execute_clauseelement             column_keys=keys,             for_executemany=for_executemany,             schema_translate_map=schema_translate_map,             linting=self.dialect.compiler_linting | compiler.WARN_LINTING,         )         ret = self._execute_context(
+                          dialect,             dialect.execution_ctx_cls._init_compiled,             compiled_sql,             distilled_parameters,             execution_options, File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1842, in _execute_context             return self._exec_insertmany_context(                 dialect,                 context,             )         else:             return self._exec_single_context(
+                                   dialect, context, statement, parameters             )      def _exec_single_context(         self, File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1983, in _exec_single_context             context.post_exec()              result = context._setup_result_proxy()          except BaseException as e:             self._handle_dbapi_exception(
+            ^                 e, str_statement, effective_parameters, cursor, context             )          return result  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 2325, in _handle_dbapi_exception              if newraise:                 raise newraise.with_traceback(exc_info[2]) from e             elif should_wrap:                 assert sqlalchemy_exception is not None                 raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^             else:                 assert exc_info[1] is not None                 raise exc_info[1].with_traceback(exc_info[2])         finally:             del self._reentrant_error File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1964, in _exec_single_context                             context,                         ):                             evt_handled = True                             break                 if not evt_handled:                     self.dialect.do_execute(
+                    ^                         cursor, str_statement, effective_parameters, context                     )              if self._has_events or self.engine._has_events:                 self.dispatch.after_cursor_execute( File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py"", line 747, in do_execute      def do_executemany(self, cursor, statement, parameters, context=None):         cursor.executemany(statement, parameters)      def do_execute(self, cursor, statement, parameters, context=None):         cursor.execute(statement, parameters)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      def do_execute_no_params(self, cursor, statement, context=None):         cursor.execute(statement)      def is_disconnect(self, e, connection, cursor): sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: books [SQL: SELECT books.id AS books_id, books.book_title AS books_book_title, books.secret_content AS books_secret_content, books.user_id AS books_user_id FROM books] (Background on this error at: https://sqlalche.me/e/20/e3q8) This is the Copy/Paste friendly version of the traceback. Traceback (most recent call last):
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1964, in _exec_single_context
+    self.dialect.do_execute(
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py"", line 747, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.OperationalError: no such table: books
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 2548, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 2528, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/flask/app.py"", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/connexion/decorators/decorator.py"", line 68, in wrapper
+    response = function(request)
+               ^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/connexion/decorators/uri_parsing.py"", line 149, in wrapper
+    response = function(request)
+               ^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/connexion/decorators/parameter.py"", line 120, in wrapper
+    return function(**kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File ""/vampi/api_views/books.py"", line 13, in get_all_books
+    return_value = jsonify({'Books': Book.get_all_books()})
+                                     ^^^^^^^^^^^^^^^^^^^^^^
+  File ""/vampi/models/books_model.py"", line 28, in get_all_books
+    return [Book.json(user) for user in Book.query.all()]
+                                        ^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py"", line 2712, in all
+    return self._iter().all()  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py"", line 2872, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py"", line 2229, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py"", line 2124, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/context.py"", line 252, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1414, in execute
+    return meth(
+           ^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py"", line 489, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1638, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1842, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1983, in _exec_single_context
+    self._handle_dbapi_exception(
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 2325, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py"", line 1964, in _exec_single_context
+    self.dialect.do_execute(
+  File ""/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py"", line 747, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: books
+[SQL: SELECT books.id AS books_id, books.book_title AS books_book_title, books.secret_content AS books_secret_content, books.user_id AS books_user_id 
+FROM books]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+ The debugger caught an exception in your WSGI application. You can now look at the traceback which led to the error. If you enable JavaScript you can also use additional features such as code execution (if the evalex feature is enabled), automatic pasting of the exceptions and much more. Brought to you by DON'T PANIC, your friendly Werkzeug powered traceback interpreter. Console Locked The console is locked and needs to be unlocked by entering the PIN. You can find the PIN printed out on the standard output of your shell that runs the server. PIN:",5671

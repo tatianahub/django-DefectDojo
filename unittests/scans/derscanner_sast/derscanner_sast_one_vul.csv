@@ -1,0 +1,48 @@
+Vulnerability,Language,Description,Recommendations,Links,File,Line,Severity Level,Classifications,DerCodeFix,DerTriage,Correlation with DAST,Status,Source code,Trace,Confidence,Event log,Vulnerability UUID
+Reflected XSS,JavaScript,"The reflected XSS or client type XSS attack is possible. Cross-site scripting is one of the most common types of attacks on web applications. XSS attacks take seventh place in the “OWASP Top 10 2017” list of ten most significant vulnerabilities in web applications. The main phase of any XSS attack is an imperceptible for the victim execution of a malicious code in the context of the vulnerable application. For this purpose, the functionality of the client application (browser) is used that allows to automatically execute scripts embedded in web page code. In most cases, these malicious scripts are implemented in JavaScript. Consequences of an XSS attack vary from violations of application functionality to complete loss of user data confidentiality. The malicious code during the XSS attack can steal user HTTP-cookie, which gives an attacker the ability to make requests to the server on behalf of the user. OWASP suggests the following classification of XSS attacks: Server type XSS occurs when data from an untrusted source is included in the response returned by the server. The source of such data can be both user input and server database (where it had been previously injected by an attacker who exploited vulnerabilities in the server-side application). Client type XSS occurs when the raw data from the user input contains code that changes the Document Object Model (DOM) of the web page received from the server. The source of such data can be both the DOM and the data received from the server (e.g., in response to an AJAX request). Typical server type attack scenario: Unvalidated data, usually from a HTTP request, gets into the server part of the application. The server dynamically generates a web page that contains the unvalidated data. In the process of generating a web page, server does not prevent the inclusion of an executable code that can be executed in the client (browser), such as JavaScript code language, HTML-tags, HTML-attributes, Flash, ActiveX, etc., in the page code. The victim’s client application displays the web page that contains the malicious code injected via data from an untrusted source. Since malicious code is injected in the web page coming from the known server, the client part of the application (browser) executes it with the rights set for the application. This violates the same-origin policy, according to which the code from the one source must not get an access to resources from another source. Client type attacks are executed in a similar way with the only difference that the malicious code is injected during the phase of the client application work with the document object model received from the server.","Implement a validation mechanism. Whitelist is more secure but less flexible than the blacklist. The blacklist must at least include the characters “&”, “<”, “>”, and quotation marks. Many web application servers provide their own mechanisms of protection against XSS, but they may not be considered sufficient. There is no guarantee that the application will run in conjunction with the server that updates these mechanisms timely and completely.","https://owasp.org/www-community/attacks/xss/,https://cwe.mitre.org/data/definitions/79.html,https://owasp.org/www-community/Types_of_Cross-Site_Scripting,https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html,https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS),https://cwe.mitre.org/data/definitions/1029.html,https://cwe.mitre.org/data/definitions/80.html,https://cwe.mitre.org/data/definitions/81.html,https://cwe.mitre.org/data/definitions/83.html",myproject/min.js,36,Medium,OWASP Top 10 2017:A3-Sensitive Data Exposure; A7-Cross-Site Scripting (XSS); OWASP Top 10 2021:A3-Injection; OWASP ASVS:V5.3.3 (L1/L2/L3); V5.1.1 (L1/L2/L3); PCI DSS 4.0.1:6.2.4; CWE:CWE-79; CWE-80; CWE-81; CWE-83; CWE/SANS Top 25 2011:CWE-79; CWE/SANS Top 25 2021:CWE-79; CWE/SANS Top 25 2023:CWE-79,"myproject/min.js; 35; Added sanitizeHtml function to sanitize the HTML content before setting it to innerHTML; 35     const html = req.params.el;
+","Confirmed. The code snippet provided directly assigns user input (`req.params.el`) to `elm.innerHTML`, which is a classic example of client type XSS. This indicates that the user input is not being sanitized or escaped before being injected into the DOM, allowing for the potential execution of malicious scripts. However, the probability given (39%) and lack of context from other parts of the codebase slightly decrease confidence.",Unconfirmed,Not processed,"""myproject/min.js:36; 
+33 
+34 function setInnerHTML(elm) {
+35     const html = req.params.el;
+
+36     elm.innerHTML = html;
+
+37     Array.from(elm.querySelectorAll(""script"")).forEach( oldScript => {
+38         const newScript = document.createElement(""script"");
+39         Array.from(oldScript.attributes)
+""","""[myproject/min.js:35; 
+32 }
+33 
+34 function setInnerHTML(elm) {
+
+35     const html = req.params.el;
+
+36     elm.innerHTML = html;
+37     Array.from(elm.querySelectorAll(""script"")).forEach( oldScript => {
+38         const newScript = document.createElement(""script"");
+-myproject/min.js:35; 
+32 }
+33 
+34 function setInnerHTML(elm) {
+
+35     const html = req.params.el;
+
+36     elm.innerHTML = html;
+37     Array.from(elm.querySelectorAll(""script"")).forEach( oldScript => {
+38         const newScript = document.createElement(""script"");
+-myproject/min.js:36; 
+33 
+34 function setInnerHTML(elm) {
+35     const html = req.params.el;
+
+36     elm.innerHTML = html;
+
+37     Array.from(elm.querySelectorAll(""script"")).forEach( oldScript => {
+38         const newScript = document.createElement(""script"");
+39         Array.from(oldScript.attributes)
+]""",3,"DerTriage  02.12.2025 12:40:48
+
+The code snippet shows that user input (`req.params.el`) is directly assigned to `elm.innerHTML`. This is a classic case of DOM-based XSS, as the user input is not sanitized and is directly used to modify the DOM. Given that it's in JavaScript and involves direct manipulation of HTML content, the probability of this being a real security issue is high. The provided probability (39%) seems low compared to what we would expect from such an obvious vulnerability pattern. DerTriage recommends changing the vulnerability status to Confirmed.
+DerTriage  02.12.2025 13:09:21
+
+The code snippet provided directly assigns user input (`req.params.el`) to `elm.innerHTML`, which is a classic example of client type XSS. This indicates that the user input is not being sanitized or escaped before being injected into the DOM, allowing for the potential execution of malicious scripts. However, the probability given (39%) and lack of context from other parts of the codebase slightly decrease confidence. DerTriage recommends changing the vulnerability status to Confirmed.",570b7f89-d33a-4236-a962-a77212a8b042

@@ -1,0 +1,16 @@
+Dependency,Version,Vulnerability,Description,Recommendations,Links,Severity Level,Classification Identifier,EPSS,CVSS v2.0,CVSS v3.1,Status,Call Trace,Import Trace,Event log,Jira Task Identifier,Jira Task Name,Jira Parent Task,Jira Issue Type,Jira Task Priority,Jira Task Assignee,Jira Task Status,Dependency type,Dependencies,ID
+Pillow 9.4.0 HPND,9.4.0,CVE-2023-50447,"Pillow through 10.1.0 allows PIL.ImageMath.eval Arbitrary Code Execution via the environment parameter, a different vulnerability than CVE-2022-22817 (which was about the expression parameter).","Vulnerability affects Pillow [0,10.2.0). Upgrade Pillow to 10.2.0 or higher.","https://devhub.checkmarx.com/cve-details/CVE-2023-50447/
+https://github.com/python-pillow/Pillow/commit/45c726fd4daa63236a8f3653530f297dc87b160a
+https://duartecsantos.github.io/2024-01-02-CVE-2023-50447/
+https://github.com/python-pillow/Pillow/releases
+https://duartecsantos.github.io/2023-01-02-CVE-2023-50447
+http://www.openwall.com/lists/oss-security/2024/01/20/1
+https://github.com/advisories/GHSA-3f63-hfp8-52jq
+https://github.com/python-pillow/Pillow
+https://devhub.checkmarx.com/cve-details/CVE-2023-50447
+https://duartecsantos.github.io/2024-01-02-CVE-2023-50447
+https://pillow.readthedocs.io/en/stable/releasenotes/10.2.0.html#security
+https://lists.debian.org/debian-lts-announce/2024/01/msg00019.html
+https://nvd.nist.gov/vuln/detail/CVE-2023-50447",Critical,"CVE: https://nvd.nist.gov/vuln/detail/CVE-2023-50447.CWE: https://cwe.mitre.org/data/definitions/94.html,https://cwe.mitre.org/data/definitions/95.html.GitHub Security Advisory: https://github.com/advisories/GHSA-3f63-hfp8-52jq.Go Vulnerability Database: -.Python Packaging Advisory Database: -.RustSec Advisory Database: -",0.006,-,8.1,Not processed,"""Pillow 9.4.0 call in null: [demo_project_venv/introduction/views.py; 562; output = ImageMath.eval(function_str,img = img, b=b, r=r, g=g)] ""","""Pillow 9.4.0 call in null: [demo_project_venv/introduction/views.py; 34; 
+from PIL import Image, ImageMath
+from requests.structures import CaseInsensitiveDict] """,,,,,,,,,"Direct dependency, The component has dependencies",defusedxml 0.7.1,88495

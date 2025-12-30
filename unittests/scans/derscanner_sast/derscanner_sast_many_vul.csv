@@ -1,0 +1,109 @@
+Vulnerability,Language,Description,Recommendations,Links,File,Line,Severity Level,Classifications,DerCodeFix,DerTriage,Correlation with DAST,Status,Source code,Trace,Confidence,Event log,Vulnerability UUID
+Reflected XSS,JavaScript,"The reflected XSS or client type XSS attack is possible. Cross-site scripting is one of the most common types of attacks on web applications. XSS attacks take seventh place in the “OWASP Top 10 2017” list of ten most significant vulnerabilities in web applications. The main phase of any XSS attack is an imperceptible for the victim execution of a malicious code in the context of the vulnerable application. For this purpose, the functionality of the client application (browser) is used that allows to automatically execute scripts embedded in web page code. In most cases, these malicious scripts are implemented in JavaScript. Consequences of an XSS attack vary from violations of application functionality to complete loss of user data confidentiality. The malicious code during the XSS attack can steal user HTTP-cookie, which gives an attacker the ability to make requests to the server on behalf of the user. OWASP suggests the following classification of XSS attacks: Server type XSS occurs when data from an untrusted source is included in the response returned by the server. The source of such data can be both user input and server database (where it had been previously injected by an attacker who exploited vulnerabilities in the server-side application). Client type XSS occurs when the raw data from the user input contains code that changes the Document Object Model (DOM) of the web page received from the server. The source of such data can be both the DOM and the data received from the server (e.g., in response to an AJAX request). Typical server type attack scenario: Unvalidated data, usually from a HTTP request, gets into the server part of the application. The server dynamically generates a web page that contains the unvalidated data. In the process of generating a web page, server does not prevent the inclusion of an executable code that can be executed in the client (browser), such as JavaScript code language, HTML-tags, HTML-attributes, Flash, ActiveX, etc., in the page code. The victim’s client application displays the web page that contains the malicious code injected via data from an untrusted source. Since malicious code is injected in the web page coming from the known server, the client part of the application (browser) executes it with the rights set for the application. This violates the same-origin policy, according to which the code from the one source must not get an access to resources from another source. Client type attacks are executed in a similar way with the only difference that the malicious code is injected during the phase of the client application work with the document object model received from the server.","Implement a validation mechanism. Whitelist is more secure but less flexible than the blacklist. The blacklist must at least include the characters “&”, “<”, “>”, and quotation marks. Many web application servers provide their own mechanisms of protection against XSS, but they may not be considered sufficient. There is no guarantee that the application will run in conjunction with the server that updates these mechanisms timely and completely.","https://owasp.org/www-community/attacks/xss/,https://cwe.mitre.org/data/definitions/79.html,https://owasp.org/www-community/Types_of_Cross-Site_Scripting,https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html,https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A7-Cross-Site_Scripting_(XSS),https://cwe.mitre.org/data/definitions/1029.html,https://cwe.mitre.org/data/definitions/80.html,https://cwe.mitre.org/data/definitions/81.html,https://cwe.mitre.org/data/definitions/83.html",myproject/min.js,36,Medium,OWASP Top 10 2017:A3-Sensitive Data Exposure; A7-Cross-Site Scripting (XSS); OWASP Top 10 2021:A3-Injection; OWASP ASVS:V5.3.3 (L1/L2/L3); V5.1.1 (L1/L2/L3); PCI DSS 4.0.1:6.2.4; CWE:CWE-79; CWE-80; CWE-81; CWE-83; CWE/SANS Top 25 2011:CWE-79; CWE/SANS Top 25 2021:CWE-79; CWE/SANS Top 25 2023:CWE-79,"myproject/min.js; 35; Added sanitizeHtml function to sanitize the HTML content before setting it to innerHTML; 35     const html = req.params.el;
+","Confirmed. The code snippet provided directly assigns user input (`req.params.el`) to `elm.innerHTML`, which is a classic example of client type XSS. This indicates that the user input is not being sanitized or escaped before being injected into the DOM, allowing for the potential execution of malicious scripts. However, the probability given (39%) and lack of context from other parts of the codebase slightly decrease confidence.",Unconfirmed,Not processed,"""myproject/min.js:36; 
+33 
+34 function setInnerHTML(elm) {
+35     const html = req.params.el;
+
+36     elm.innerHTML = html;
+
+37     Array.from(elm.querySelectorAll(""script"")).forEach( oldScript => {
+38         const newScript = document.createElement(""script"");
+39         Array.from(oldScript.attributes)
+""","""[myproject/min.js:35; 
+32 }
+33 
+34 function setInnerHTML(elm) {
+
+35     const html = req.params.el;
+
+36     elm.innerHTML = html;
+37     Array.from(elm.querySelectorAll(""script"")).forEach( oldScript => {
+38         const newScript = document.createElement(""script"");
+-myproject/min.js:35; 
+32 }
+33 
+34 function setInnerHTML(elm) {
+
+35     const html = req.params.el;
+
+36     elm.innerHTML = html;
+37     Array.from(elm.querySelectorAll(""script"")).forEach( oldScript => {
+38         const newScript = document.createElement(""script"");
+-myproject/min.js:36; 
+33 
+34 function setInnerHTML(elm) {
+35     const html = req.params.el;
+
+36     elm.innerHTML = html;
+
+37     Array.from(elm.querySelectorAll(""script"")).forEach( oldScript => {
+38         const newScript = document.createElement(""script"");
+39         Array.from(oldScript.attributes)
+]""",3,"DerTriage  02.12.2025 12:40:48
+
+The code snippet shows that user input (`req.params.el`) is directly assigned to `elm.innerHTML`. This is a classic case of DOM-based XSS, as the user input is not sanitized and is directly used to modify the DOM. Given that it's in JavaScript and involves direct manipulation of HTML content, the probability of this being a real security issue is high. The provided probability (39%) seems low compared to what we would expect from such an obvious vulnerability pattern. DerTriage recommends changing the vulnerability status to Confirmed.
+DerTriage  02.12.2025 13:09:21
+
+The code snippet provided directly assigns user input (`req.params.el`) to `elm.innerHTML`, which is a classic example of client type XSS. This indicates that the user input is not being sanitized or escaped before being injected into the DOM, allowing for the potential execution of malicious scripts. However, the probability given (39%) and lack of context from other parts of the codebase slightly decrease confidence. DerTriage recommends changing the vulnerability status to Confirmed.",570b7f89-d33a-4236-a962-a77212a8b042
+Server-Side Request Forgery (SSRF),Python,"Server-Side Request Forgery (SSRF) is possible. A Server Side Request Forgery (SSRF) vulnerability allows an attacker to change a parameter used by the web application to create or manage requests from a vulnerable server. When the manipulated request goes to the server, the server-side code picks up the manipulated URL and tries to read data to the manipulated URL. By selecting target URLs the attacker may be able to read data from services that are not directly exposed on the internet: Cloud server meta-data Database HTTP interfaces Internal REST interfaces Files (using file:// URIs)",Implement a validation mechanism for user-provided data. Do not establish network connections based on user-controlled data and ensure that the request is being sent to the expected destination.,"https://cwe.mitre.org/data/definitions/918.html,https://owasp.org/www-community/attacks/Server_Side_Request_Forgery,https://css.csail.mit.edu/6.858/2014/readings/owasp-top-10.pdf,https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A1-Injection,https://portswigger.net/web-security/ssrf,https://cwe.mitre.org/data/definitions/1027.html",bad/api_list.py,10,Medium,OWASP Top 10 2017:A1-Injection; OWASP Top 10 2021:A3-Injection; A10-Server-Side Request Forgery (SSRF); OWASP MASVS:V6.3 (L1/L2/L1+R/L2+R); OWASP ASVS:V13.1.1 (L1/L2/L3); V12.6.1 (L1/L2/L3); V5.2.6 (L1/L2/L3); PCI DSS 4.0.1:6.2.4; HIPAA:§164.312 (a)(1); CWE:CWE-918; CWE/SANS Top 25 2021:CWE-918; CWE/SANS Top 25 2023:CWE-918,"bad/api_list.py; 10; Added a whitelist of allowed usernames to prevent SSRF; 10     allowed_usernames = ['alice', 'bob', 'charlie']  # Example whitelist
+11     if username in allowed_usernames:
+12         r = requests.get('http://127.0.1.1:5000/api/post/{}'.format(username))
+13     else:
+14         raise ValueError(""Invalid username"")
+","Confirmed. The code snippet directly constructs a URL with user input (`username`) and makes an HTTP request to it. This is a classic SSRF pattern, especially concerning the use of `127.0.1.1`, which might be an internal IP address. However, without more context or seeing if `username` is sanitized or validated, the probability leans towards a real issue, but not absolutely certain.",Unconfirmed,Not processed,"""bad/api_list.py:10; 
+7 @click.argument('username')
+8 def cmd_api_client(username):
+9 
+
+10     r = requests.get('http://127.0.1.1:5000/api/post/{}'.format(username))
+
+11     if r.status_code != 200:
+12         click.echo('Some error ocurred. Status Code: {}'.format(r.status_code))
+13         print(r.text)
+""","""[bad/api_list.py:10; 
+7 @click.argument('username')
+8 def cmd_api_client(username):
+9 
+
+10     r = requests.get('http://127.0.1.1:5000/api/post/{}'.format(username))
+
+11     if r.status_code != 200:
+12         click.echo('Some error ocurred. Status Code: {}'.format(r.status_code))
+13         print(r.text)
+]""",5,"DerTriage  25.12.2025 10:03:37
+
+The code snippet directly constructs a URL with user input (`username`) and makes an HTTP request to it. This is a classic SSRF pattern, especially concerning the use of `127.0.1.1`, which might be an internal IP address. However, without more context or seeing if `username` is sanitized or validated, the probability leans towards a real issue, but not absolutely certain. DerTriage recommends changing the vulnerability status to Confirmed.",da717db3-9110-47c4-9573-913a8bdd5007
+Hardcoded encryption key,Python,"Key is hardcoded. This may lead to an application data compromise. Eliminating the security risks related to keys being specified in the source code is extremely difficult. Such keys are available at least to every developer of the application. Moreover, after the application is installed, removing the key from its code is possible only via an update. Constant strings are easily extracted from the compiled application by decompilers. Therefore, an attacker does not necessarily need to have access to the source code to find out the value of the key. Sensitive Data Exposure vulnerabilities take the third place in the “OWASP Top 10 2017” web-application vulnerabilities ranking.","Do not use hardcoded keys. To generate the keys, it is recommended to use a cryptographically secure PRNG (pseudorandom number generators). To store keys, you need to use special solutions, such as Hardware Security Modules. For security reasons, you need to regularly update your keys.","https://owasp.org/www-community/vulnerabilities/Use_of_hard-coded_password,https://cwe.mitre.org/data/definitions/259.html,https://css.csail.mit.edu/6.858/2014/readings/owasp-top-10.pdf,https://css.csail.mit.edu/6.858/2014/readings/owasp-top-10.pdf,https://owasp.org/www-project-top-ten/OWASP_Top_Ten_2017/Top_10-2017_A3-Sensitive_Data_Exposure,https://cwe.mitre.org/data/definitions/321.html,https://cwe.mitre.org/data/definitions/1032.html,https://cwe.mitre.org/data/definitions/798.html",bad/vulpy-ssl.py,13,Critical,OWASP Top 10 2017:A3-Sensitive Data Exposure; A6-Security Misconfiguration; OWASP Top 10 2021:A2-Cryptographic Failures; A4-Insecure Design; OWASP MASVS:V2.2 (L1/L2/L1+R/L2+R); V2.14 (L2/L2+R); V3.1 (L1/L2/L1+R/L2+R); V8.11 (L1+R/L2+R); V8.13 (L1+R/L2+R); OWASP ASVS:V6.4.2 (L2/L3); V6.4.1 (L2/L3); V6.2.4 (L2/L3); V3.5.2 (L2/L3); V2.10.4 (L2/L3); PCI DSS 4.0.1:3.7.3; 6.5.6; 6.2.4; 8.3.2; HIPAA:§164.312 (e)(1); CWE:CWE-257; CWE-321; CWE-522; CWE-798; CWE/SANS Top 25 2011:CWE-798; CWE/SANS Top 25 2021:CWE-522; CWE-798; CWE/SANS Top 25 2023:CWE-798,bad/vulpy-ssl.py; 13; Do not store secrets explicitly in the code; use environment variables instead. ; It is not possible to provide fixes for this code,"Confirmed. The code snippet clearly shows a hardcoded secret key, which is a security risk. There are no signs of it being in a test case, and the vulnerability probability given is relatively high. The code snippet is straightforward and does not seem confusing.",Unconfirmed,Not processed,"""bad/vulpy-ssl.py:13; 
+10 import libsession
+11 
+12 app = Flask('vulpy')
+
+13 app.config['SECRET_KEY'] = 'aaaaaaa'
+
+14 
+15 app.register_blueprint(mod_hello, url_prefix='/hello')
+16 app.register_blueprint(mod_user, url_prefix='/user')
+""","""[bad/vulpy-ssl.py:13; 
+10 import libsession
+11 
+12 app = Flask('vulpy')
+
+13 app.config['SECRET_KEY'] = 'aaaaaaa'
+
+14 
+15 app.register_blueprint(mod_hello, url_prefix='/hello')
+16 app.register_blueprint(mod_user, url_prefix='/user')
+-bad/vulpy-ssl.py:13; 
+10 import libsession
+11 
+12 app = Flask('vulpy')
+
+13 app.config['SECRET_KEY'] = 'aaaaaaa'
+
+14 
+15 app.register_blueprint(mod_hello, url_prefix='/hello')
+16 app.register_blueprint(mod_user, url_prefix='/user')
+]""",5,"DerTriage  25.12.2025 10:03:59
+
+The code snippet clearly shows a hardcoded secret key, which is a security risk. There are no signs of it being in a test case, and the vulnerability probability given is relatively high. The code snippet is straightforward and does not seem confusing. DerTriage recommends changing the vulnerability status to Confirmed.",58bf0ab8-95f6-45d1-a60a-a9e8486d045c

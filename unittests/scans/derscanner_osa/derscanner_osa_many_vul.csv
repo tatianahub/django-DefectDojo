@@ -1,0 +1,30 @@
+Dependency,Version,Vulnerability,Description,Recommendations,Links,Severity Level,Classification Identifier,EPSS,CVSS v2.0,CVSS v3.1,Status,Call Trace,Import Trace,Event log,Jira Task Identifier,Jira Task Name,Jira Parent Task,Jira Issue Type,Jira Task Priority,Jira Task Assignee,Jira Task Status,Dependency type,Dependencies,ID
+Pillow 9.4.0 HPND,9.4.0,CVE-2023-50447,"Pillow through 10.1.0 allows PIL.ImageMath.eval Arbitrary Code Execution via the environment parameter, a different vulnerability than CVE-2022-22817 (which was about the expression parameter).","Vulnerability affects Pillow [0,10.2.0). Upgrade Pillow to 10.2.0 or higher.","https://devhub.checkmarx.com/cve-details/CVE-2023-50447/
+https://github.com/python-pillow/Pillow/commit/45c726fd4daa63236a8f3653530f297dc87b160a
+https://duartecsantos.github.io/2024-01-02-CVE-2023-50447/
+https://github.com/python-pillow/Pillow/releases
+https://duartecsantos.github.io/2023-01-02-CVE-2023-50447
+http://www.openwall.com/lists/oss-security/2024/01/20/1
+https://github.com/advisories/GHSA-3f63-hfp8-52jq
+https://github.com/python-pillow/Pillow
+https://devhub.checkmarx.com/cve-details/CVE-2023-50447
+https://duartecsantos.github.io/2024-01-02-CVE-2023-50447
+https://pillow.readthedocs.io/en/stable/releasenotes/10.2.0.html#security
+https://lists.debian.org/debian-lts-announce/2024/01/msg00019.html
+https://nvd.nist.gov/vuln/detail/CVE-2023-50447",Critical,"CVE: https://nvd.nist.gov/vuln/detail/CVE-2023-50447.CWE: https://cwe.mitre.org/data/definitions/94.html,https://cwe.mitre.org/data/definitions/95.html.GitHub Security Advisory: https://github.com/advisories/GHSA-3f63-hfp8-52jq.Go Vulnerability Database: -.Python Packaging Advisory Database: -.RustSec Advisory Database: -",0.006,-,8.1,Not processed,"""Pillow 9.4.0 call in null: [demo_project_venv/introduction/views.py; 562; output = ImageMath.eval(function_str,img = img, b=b, r=r, g=g)] ""","""Pillow 9.4.0 call in null: [demo_project_venv/introduction/views.py; 34; 
+from PIL import Image, ImageMath
+from requests.structures import CaseInsensitiveDict] """,,,,,,,,,"Direct dependency, The component has dependencies",defusedxml 0.7.1,88495
+zipp 3.8.0 MIT,3.8.0,CVE-2024-5569,"A Denial of Service (DoS) vulnerability exists in the jaraco/zipp library, affecting all versions prior to 3.19.1. The vulnerability is triggered when processing a specially crafted zip file that leads to an infinite loop. This issue also impacts the zipfile module of CPython, as features from the third-party zipp library are later merged into CPython, and the affected code is identical in both projects. The infinite loop can be initiated through the use of functions affecting the `Path` module in both zipp and zipfile, such as `joinpath`, the overloaded division operator, and `iterdir`. Although the infinite loop is not resource exhaustive, it prevents the application from responding. The vulnerability was addressed in version 3.19.1 of jaraco/zipp.","Vulnerability affects zipp [0,3.19.1). Upgrade zipp to 3.19.1 or higher.","https://github.com/jaraco/zipp
+https://huntr.com/bounties/be898306-11f9-46b4-b28c-f4c4aa4ffbae
+https://github.com/advisories/GHSA-jfmj-5v4g-7637
+https://nvd.nist.gov/vuln/detail/CVE-2024-5569
+https://github.com/jaraco/zipp/commit/fd604bd34f0343472521a36da1fbd22e793e14fd",Medium,CVE: https://nvd.nist.gov/vuln/detail/CVE-2024-5569.CWE: https://cwe.mitre.org/data/definitions/835.html.GitHub Security Advisory: https://github.com/advisories/GHSA-jfmj-5v4g-7637.Go Vulnerability Database: -.Python Packaging Advisory Database: -.RustSec Advisory Database: -,0.000,-,6.2,Not processed,"""""","""""",,,,,,,,,Direct dependency,,88529
+sqlparse 0.3.1 BSD-3-Clause,0.3.1,CVE-2023-30608,sqlparse is a non-validating SQL parser module for Python. In affected versions the SQL parser contains a regular expression that is vulnerable to ReDoS (Regular Expression Denial of Service). This issue was introduced by commit `e75e358`. The vulnerability may lead to Denial of Service (DoS). This issues has been fixed in sqlparse 0.4.4 by commit `c457abd5f`. Users are advised to upgrade. There are no known workarounds for this issue.,"Vulnerability affects sqlparse [0.1.15,0.4.4). Upgrade sqlparse to 0.4.4 or higher.","https://github.com/andialbrecht/sqlparse/commit/c457abd5f097dd13fb21543381e7cfafe7d31cfb
+https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS
+https://nvd.nist.gov/vuln/detail/CVE-2023-30608
+https://github.com/andialbrecht/sqlparse/commit/e75e35869473832a1eb67772b1adfee2db11b85a
+https://github.com/pypa/advisory-database/tree/main/vulns/sqlparse/PYSEC-2023-87.yaml
+https://github.com/andialbrecht/sqlparse
+https://github.com/advisories/GHSA-rrm6-wvj7-cwh2
+https://lists.debian.org/debian-lts-announce/2023/05/msg00017.html
+https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-rrm6-wvj7-cwh2",Medium,"CVE: https://nvd.nist.gov/vuln/detail/CVE-2023-30608.CWE: https://cwe.mitre.org/data/definitions/1333.html,https://cwe.mitre.org/data/definitions/1333.html.GitHub Security Advisory: https://github.com/advisories/GHSA-rrm6-wvj7-cwh2.Go Vulnerability Database: -.Python Packaging Advisory Database: PYSEC-2023-87.RustSec Advisory Database: -",0.006,-,5.5,Not processed,"""      """,""" """,,,,,,,,,Direct dependency,,88521
